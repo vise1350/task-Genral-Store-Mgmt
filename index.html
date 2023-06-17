@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Genral Store Management</title>
+</head>
+<body>
+
+      <form onsubmit="saveData(event)">
+
+   
+    <label > Item Name </label>
+    <input type="text" name="item" id="nameid" required/>
+    <label > Description </label>
+    <input type="text" name="desc" id="descid" required/>
+    <label > Selling price </label>
+    <input type="number" name="price" id="priceid" required/>
+    <label > Quantity </label>
+    <input type="number" name="quantity" id="qtyid" required/>
+    <button>Add Item </button>
+
+</form>
+<ul id="ListOfItems"></ul>
+<p id="para"></p>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
+
+<script>
+    function saveData(event){
+        event.preventDefault();
+
+
+        const val=event.target.item.value
+        const desc=event.target.desc.value
+
+        const price=event.target.price.value
+        const qty=event.target.quantity.value
+
+        const obj={
+            val,desc,price,qty
+        }
+        console.log(obj)
+        axios.post("https://crudcrud.com/api/baec672450a6427d87ff0d28a3bd3149/data",obj)
+            .then((response)=>{
+                console.log(response)
+            })
+            .catch((err)=>{
+                console.log(err)
+            })
+
+            showUser(obj)
+
+
+
+
+    }
+
+        addEventListener("DOMContentLoaded",(event)=>{
+            axios.get("https://crudcrud.com/api/baec672450a6427d87ff0d28a3bd3149/data")
+                .then((response)=>{
+                    for(let i=0;i<response.data.length;i++){
+                        console.log(response.data[i])
+                        showUser(response.data[i])
+                        // console.log(response.data.qty[i])
+                    }
+                })
+                .catch((error)=>{
+                    console.log(error)
+                })
+        })
+
+        function showUser(obj){
+            const parentElem=document.getElementById("ListOfItems")
+            const childElem=`<li id="${obj._id}"> ${obj.val} - ${obj.desc}-${obj.price}-${obj.qty} 
+                <button onclick="reduceQty('${obj._id}')"> Buy </button>
+                </li>`
+
+            parentElem.innerHTML=parentElem.innerHTML+childElem
+        }
+
+        // function editUser(userId){
+        //     axios.put(`https://crudcrud.com/api/baec672450a6427d87ff0d28a3bd3149/data/${userId}`)
+        //         .then((response)=>{
+        //             reduceQty(userId)
+        //         })
+        //         .catch((error)=>{
+        //             console.log(error)
+        //         })
+        // }
+
+        function reduceQty(userId){
+            axios.get(`https://crudcrud.com/api/baec672450a6427d87ff0d28a3bd3149/data/${userId}`)
+            // console.log(qty)
+                .then((response)=>{
+
+                    const updatedQty = response.data.qty - 1;
+
+                    const updatedData = { ...response.data, qty: updatedQty };
+                    // return response.data.qty
+                    // console.log(qty)
+                    axios.put(`https://crudcrud.com/api/baec672450a6427d87ff0d28a3bd3149/data/${userId}`,{updatedData})
+                    .then((response)=>{
+                    console.log("quantity is updated")
+                    showUser(updatedData)
+                    })
+                    .catch((error)=>{
+                    console.log(error)
+                    })
+                })
+                .catch((error)=>{
+                    console.log("error")
+                })
+      
+            
+
+
+        }
+
+
+
+
+
+</script>
+    
+</body>
+</html>
